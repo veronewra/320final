@@ -1,20 +1,24 @@
 ## Coming to Climate Conclusions
 
-Over thanksgiving break, I found myself having to repeatedly explain why climate change is an issue, and why its definitely caused by humans this time. While I think I made some convincing arguments, I really wished I had more good, data-proven visualizations to help get my point across. Having a transparent, reproducible graph is more convincing than just, "because the scientists say so". Thats why in preperation for winter break, I made a quick sample on how to handle arguments with a data science approach. I hope this walthrough can give readers ammunition in any climate change arguments that may arise this holiday season, but more importantly, I want readers to learn how to take raw data and draw conclusions themselves.
+Over thanksgiving break, I found myself having to repeatedly explain why climate change is an issue, and why its definitely caused by humans this time. While I think I made some convincing arguments, I really wished I had more good, data-proven visualizations to help get my point across. Having a transparent, reproducible results is a great way to convince others. Even just getting a better understanding of how scientists come to their conclusions could reduce skeptism of the results. Thats why in preperation for winter break, I made a quick sample on how to get real insight from messy data. I hope this walkthrough can give readers ammunition in any climate change arguments that may arise this holiday season, but more importantly, I want readers to learn how to take raw data and draw conclusions themselves.
 
 Lets take this statement for example: 
+
 "Earths climate has been changing throughout all of history, there are natural cycles that are thousands of years long. The warming we see now could be caused by things like earths orbit changing" 
 
 Quick googling nets me the following information: 
+
 We detect largescale cycles by looking at rock layers. The climactic cycles caused by changes in earths orbit are called Milankovitch cycles. There are three components of Milankovitch cycles: 
 
 - eccentricity: cycles about 100,000 years
 - obliquity: cycles about 41,000 years
 - precession: cycles about 25,771.5 years
 
-Eccentricity describes the shape of our orbit; if its more circular or more elliptical. Obliquity describes the tilt of our planets axis. Precession is the "wobble" of our planet, simlilar to how a spinning dreidle sometimes wobbles. Here is an article that fully explains milankovitch cycles and even has videos showing what each type of cycle looks like: https://climate.nasa.gov/news/2948/milankovitch-orbital-cycles-and-their-role-in-earths-climate/ 
+Eccentricity describes the shape of our orbit; if its more circular or more elliptical. Obliquity describes the tilt of our planets axis. Precession is the "wobble" of our planet, simlilar to how a spinning dreidle sometimes wobbles. [Here](https://climate.nasa.gov/news/2948/milankovitch-orbital-cycles-and-their-role-in-earths-climate/) is an article that fully explains milankovitch cycles and even has videos showing what each type of cycle looks like.  
 
 So, can these cycles really explain climate change? Lets visualize the data to find out more about the bahavior of milankovitch cycles. 
+
+[milankovitch cycle data](http://vo.imcce.fr/insola/earth/online/earth/La2004/INSOLN.LA2004.BTL.ASC)
 
 ```python3
 import pandas as pd 
@@ -33,6 +37,8 @@ display(df)
 # dont need THAT much past data, I think 5 million years will suffice?
 df = df[df['time'] >= -5000]
 
+# notice that there arent any None / null values in this dataset;
+# dont forget to check datasets (or use the .notna() function)
 
 # we have to convert the data to numerical data so that we can use it
 # notice that the format of the numbers is weird; ends with something like "D-01"
@@ -121,9 +127,10 @@ temp_df.plot(x='Year', y='No_Smoothing', legend=False, title="Average Global Tem
 ```
 ![image](https://user-images.githubusercontent.com/49928811/146706755-caceffa2-a65f-452f-b8ad-59a72f15a388.png)![image](https://user-images.githubusercontent.com/49928811/146706768-5bc55f0c-7800-4687-ab19-b208d1b16a4b.png)
 
-Given that the forcing from milankovitch cycles is nearly constant while the global temperature looks exponential, cycles that take tens of thousands of years can safely be ruled out. However, there are also decadal cycles on earth that are caused by long-term patterns of high and low pressure zones. A significant one that comes to mind is the pacific decedal oscillation. Watch this two minute video to get a better understanding of how it operates: https://www.youtube.com/watch?v=Sc3tOEcM0YE 
-Next up, we'll be using some pretty neat statistics to give us a better understanding of the correlation between the pdo and the global temperature.
+Given that the forcing from milankovitch cycles is nearly constant while the global temperature looks exponential, cycles that take tens of thousands of years can safely be ruled out. However, there are also decadal cycles on earth that are caused by long-term patterns of high and low pressure zones. A significant one that comes to mind is the pacific decedal oscillation. I highly reccomend watching [this two minute video](https://www.youtube.com/watch?v=Sc3tOEcM0YE) to get a better understanding of how the pacific decedal oscillation (PDO) operates. 
+Next up, we'll be using some pretty neat statistics to give us a better understanding of the correlation between the PDO index and the global temperature.
 
+[PDO data](//www.ncdc.noaa.gov/teleconnections/pdo/)
 ```python3
 # data from https://www.ncdc.noaa.gov/teleconnections/pdo/ 
 pdo_df = pd.read_fwf('noaaPDOdata.txt')
@@ -164,7 +171,7 @@ plt.title("PDO forcing and global temperature")
 They dont look very correlated, but thats not enough to draw conclusions. There are many statistical analyses that can give us more insight, but lets start with some basic ones.
 The pearson correlation coefficient can tell us how strongly two continuous variables are correlated. It ranges from -1 to 1, -1 being a strong inverse correlation and 1 being a strong positive relationship. A pearson correlation around zero indicates little to no correlation. 
 
-p-values are a little harder to explain, this article probably does it better than I can: https://www.scribbr.com/statistics/p-value/ 
+p-values are a little harder to explain, [this article](https://www.scribbr.com/statistics/p-value/) probably does it better than I can. 
 tldr: the p value is the probability the observation happened by chance. A smaller p-value suggests higher statistical significance 
 
 ```python3
@@ -182,6 +189,7 @@ The pearsons correlation is very small, which suggests that the pacific decedal 
 
 If we cant tell whether the pacific decedal oscillation is causing an increase in global temperature over the last couple of decades, maybe we can say with greater confidence that carbon dioxide emmissions are? 
 
+[co2 data](https://github.com/owid/co2-data/blob/master/owid-co2-data.csv)
 ```python3
 #co2 emmisions 
 #data from: https://github.com/owid/co2-data/blob/master/owid-co2-data.csv 
@@ -202,6 +210,7 @@ plt.title("Human CO2 Emissions")
 plt.show()
 ```
 ![image](https://user-images.githubusercontent.com/49928811/146712757-f089b14e-1bad-41f8-9cad-eb4b80b03141.png)
+ 
  This curve does seem to resemble the gloabl temperature trend better. What do the numbers have to say? 
  
  ```python3
@@ -216,9 +225,14 @@ print(f"Pearsons correlation: {pears_corr_coef}\nP-value: {p_value}\n")
  ```
 ![image](https://user-images.githubusercontent.com/49928811/146713899-09ed1821-920d-4b05-8d8d-b76d4056dca0.png)
 
-Wow! I've never seen a p value that low. Its in scientific notation, so there are 53 zeros after the decimal before "2". The pearsons correlation is close to 1, so we can be very certain that an increase in carbon emissions is correlated with an increase in global temperature. Now, lets try to use this data to predict various outcomes.
+Wow! I've never seen a p value that low. Its in scientific notation, so there are 53 zeros between the decimal and that first "2". The pearsons correlation is close to 1, so we can be very certain that an increase in carbon emissions is correlated with an increase in global temperature. 
 
-There are many, many different types of machine learning algorithms we can use. Generally you try simple methods, and if they arent enough you use more complex things to suit your needs. We'll begin with one of the simple machine learning models, linear regression, to try and predict global temperatures using human carbon dioxide emissions. A linear regression just tries to find a line that best fits the data points by minimizing the vertical distance between the data points and the regression line. Read more about linear regressions and their purpose in machine learning here: https://machinelearningmastery.com/linear-regression-for-machine-learning/ 
+The next step is to try to use this data to predict various outcomes. There are many, many different types of machine learning algorithms we can use. Generally you try simple methods, and if they arent enough you use more complex things to suit your needs. We'll begin with one of the simple machine learning models, linear regression, to try and predict global temperatures using human carbon dioxide emissions. A linear regression just tries to find a line that best fits the data points by minimizing the vertical distance between the data points and the regression line. Heres a neat visual of the least sqaures method:
+
+![image](https://user-images.githubusercontent.com/49928811/146828938-09805b77-ce1a-47f6-adf3-66be2301718f.png)
+[Source](https://medium.com/analytics-vidhya/ordinary-least-square-ols-method-for-linear-regression-ef8ca10aadfc)
+
+you can read more about linear regressions and their purpose in machine learning [here](https://machinelearningmastery.com/linear-regression-for-machine-learning/) 
 
 ```python3
 from sklearn.linear_model import LinearRegression
@@ -233,6 +247,10 @@ print(f"coefficient is: {reg.coef_[0]}")
 print(f"intercept is: {reg.intercept_}")
 ```
 ![image](https://user-images.githubusercontent.com/49928811/146820254-8146776e-11ce-4295-8d16-9dd67e992862.png)
+
+The score tells us that roughly 82% of the observed variation can be explained by the model's inputs (the best possible score is 1, which would indicate that there is no unexplained variation.) [Heres](https://www.investopedia.com/terms/r/r-squared.asp) more information about what the score represents. 
+
+The coefficient is the slope of the regression line. Combined with the intercept, we can extract the function of the regression line as: y = coef\*x + interpect
 ```python3
 #prediction for the next 100 years if we cap yearly emissions to 500ppm
 co2_hypothetical = np.array([500]*100).reshape(-1, 1)
@@ -253,6 +271,6 @@ plt.show()
 ![image](https://user-images.githubusercontent.com/49928811/146821927-2c28b3f6-2cb7-4eea-ae06-38eaa0bb6466.png)
 ![image](https://user-images.githubusercontent.com/49928811/146821947-6f21ca2f-2ab5-43b2-859f-d6d69b2e5d7e.png)
 
-Do you think this is what the global temperature trends should look like? I dont. Think about it- if we cap the amount of emmissions per year, the amount of co2 in the atmosphere would still be increasing, and therefore the temperature would also still be increasing. There are some serious flaws with using a linear regression in this context. We know there is a strong correlation between human co2 emissions and global temperatures, but that does not mean co2 emisions cause the global temperature to rise. A linear model assumes a linear relationship beween the variables, which is not true in this case. In reality, predicting the gloabl temperatures has a lot of factors, more than just emissions. For example, the average temperature even affects itself; warmer temperature -> less snow and ice coverage of our planet -> lower planetary albedo (albedo is the amount of radiation reflected instead of absorbed) -> warmer temperatures. We'd need a combination of different models. 
-    At this point, I'd just trust the collective researchers that make accurate models of climate for a living. It's still really useful to see the process (and maybe even replicate it) for yourself. Its important to keep in mind that while data visualization can be extremely revealing, it can also mislead. This quick walthrough is just sratching the surface of what you could do with data; if you want more control over your percpective (and the perspective of whoever you like to argue with), I highly reccomend taking this course: https://cmsc320.github.io/ Happy holidays!
+Do you think this is what the global temperature trends should look like? Think about it- if we cap the amount of emmissions per year, the amount of co2 in the atmosphere would still be increasing, and therefore the temperature would also still be increasing. There are some serious flaws with using a linear regression in this context. We know there is a strong correlation between human co2 emissions and global temperatures, but that does not mean co2 emisions cause the global temperature to rise. A linear model assumes a linear relationship beween the variables, which is not true in this case. In reality, predicting the gloabl temperatures has a lot of factors, more than just emissions. For example, the average temperature even affects itself; warmer temperature -> less snow and ice coverage of our planet -> lower planetary albedo (albedo is the amount of radiation reflected instead of absorbed) -> warmer temperatures. We'd need a combination of different models. 
+    At this point, I'd just trust the collective researchers that make accurate models of climate for a living. It's still really useful to see the process (and maybe even replicate it) for yourself. Its important to keep in mind that while data visualization can be extremely revealing, it can also mislead. This quick walthrough is just sratching the surface of what you could do with data; if you want more control over your percpective (and the perspective of whoever you like to argue with), I highly reccomend taking this [course](https://cmsc320.github.io/) Happy holidays!
 
