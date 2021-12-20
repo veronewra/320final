@@ -1,6 +1,6 @@
 ## Coming to Climate Conclusions
 
-Over thanksgiving break, I found myself having to repeatedly explain why climate change is an issue, and why its definitely caused by humans this time. While I think I made some convincing arguments, I really wished I had more good, data-proven visualizations to help get my point across. Having a transparent, reproducible graph is more convincing than just, "because the scientists say so". Thats why in preperation for winter break, I made a quick sample on how to handle arguments with a data-science approach. I hope this walthrough can give readers ammunition in any climate change arguments that may arise this holiday season, but more importantly, I want readers to learn how to take raw data and draw conclusions themselves.
+Over thanksgiving break, I found myself having to repeatedly explain why climate change is an issue, and why its definitely caused by humans this time. While I think I made some convincing arguments, I really wished I had more good, data-proven visualizations to help get my point across. Having a transparent, reproducible graph is more convincing than just, "because the scientists say so". Thats why in preperation for winter break, I made a quick sample on how to handle arguments with a data science approach. I hope this walthrough can give readers ammunition in any climate change arguments that may arise this holiday season, but more importantly, I want readers to learn how to take raw data and draw conclusions themselves.
 
 Lets take this statement for example: 
 "Earths climate has been changing throughout all of history, there are natural cycles that are thousands of years long. The warming we see now could be caused by things like earths orbit changing" 
@@ -161,5 +161,62 @@ plt.title("PDO forcing and global temperature")
 ```
 ![image](https://user-images.githubusercontent.com/49928811/146707103-e65d3fe6-7f75-423f-9971-9e6af48d2f60.png)
 
+They dont look very correlated, but thats not enough to draw conclusions. There are many statistical analyses that can give us more insight, but lets start with some basic ones.
+The pearson correlation coefficient can tell us how strongly two continuous variables are correlated. It ranges from -1 to 1, -1 being a strong inverse correlation and 1 being a strong positive relationship. A pearson correlation around zero indicates little to no correlation. 
 
+p-values are a little harder to explain, this article probably does it better than I can: https://www.scribbr.com/statistics/p-value/ 
+tldr: the p value is the probability the observation happened by chance. A smaller p-value suggests higher statistical significance 
+
+```python3
+covariance = np.cov(temp_df['No_Smoothing'], pdo_df['average'])
+print(covariance) #matrix
+
+from scipy.stats import pearsonr
+
+pears_corr_coef, p_value = pearsonr(temp_df['No_Smoothing'], pdo_df['average'])
+print(f"Pearsons correlation: {pears_corr_coef}\nP-value: {p_value}\n")
+```
+![image](https://user-images.githubusercontent.com/49928811/146712431-6e9d8813-0d10-4e4b-a331-8b82578774c3.png)
+
+The pearsons correlation is very small, which suggests that the pacific decedal oscillation is not significantly contributing to the rapid warming of our planet. However, our p-value says that there is 73% likelihood that the observation is by chance. Typically, the null hypothesis is only rejected if there is a less than 5% chance (so a p-value < .05) Here, we do not yet have enough data to come to a conclusion. 
+
+If we cant tell whether the pacific decedal oscillation is causing an increase in global temperature over the last couple of decades, maybe we can say with greater confidence that carbon dioxide emmissions are? 
+
+```python3
+#co2 emmisions 
+#data from: https://github.com/owid/co2-data/blob/master/owid-co2-data.csv 
+co2_df = pd.read_csv('co2info.csv')
+
+# display(co2_df)
+co2 = np.array(co2_df.groupby(['year'])['co2'].mean())
+
+#years 1750- 2020
+years = list(range(1750, 2021))
+
+plt.plot(years, co2, label="human co2 emission rate")
+plt.ylabel("parts per million")
+plt.xlabel("year")
+plt.title("Human CO2 Emissions")
+#note the difference between emissions and atmosphere level
+#note the difference between total and per year 
+plt.show()
+```
+![image](https://user-images.githubusercontent.com/49928811/146712757-f089b14e-1bad-41f8-9cad-eb4b80b03141.png)
+ This curve does seem to resemble the gloabl temperature trend better. What do the numbers have to say? 
+ 
+ ```python3
+ # human emissions vs temperature correlation 
+
+#since we only have temperature data starting in 1880, gotta cut the co2 data down
+co2 = co2[130:]
+years = years[130:]
+
+pears_corr_coef, p_value = pearsonr(list(temp_df['No_Smoothing']), co2)
+print(f"Pearsons correlation: {pears_corr_coef}\nP-value: {p_value}\n")
+ ```
+![image](https://user-images.githubusercontent.com/49928811/146713899-09ed1821-920d-4b05-8d8d-b76d4056dca0.png)
+Wow! I've never seen a p value that low. Its in scientific notation, so there are 53 zeros after the decimal before "2". The pearsons correlation is close to 1, so we can be very certain that an increase in carbon emissions is correlated with an increase in global temperature. 
+
+
+If you want more control over your percpective (and the perspective of whoever you like to argue with), I highly reccomend taking this course: https://cmsc320.github.io/ Happy holidays!
 
