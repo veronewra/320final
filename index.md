@@ -215,8 +215,44 @@ pears_corr_coef, p_value = pearsonr(list(temp_df['No_Smoothing']), co2)
 print(f"Pearsons correlation: {pears_corr_coef}\nP-value: {p_value}\n")
  ```
 ![image](https://user-images.githubusercontent.com/49928811/146713899-09ed1821-920d-4b05-8d8d-b76d4056dca0.png)
-Wow! I've never seen a p value that low. Its in scientific notation, so there are 53 zeros after the decimal before "2". The pearsons correlation is close to 1, so we can be very certain that an increase in carbon emissions is correlated with an increase in global temperature. 
 
+Wow! I've never seen a p value that low. Its in scientific notation, so there are 53 zeros after the decimal before "2". The pearsons correlation is close to 1, so we can be very certain that an increase in carbon emissions is correlated with an increase in global temperature. Now, lets try to use this data to predict various outcomes.
 
-If you want more control over your percpective (and the perspective of whoever you like to argue with), I highly reccomend taking this course: https://cmsc320.github.io/ Happy holidays!
+There are many, many different types of machine learning algorithms we can use. Generally you try simple methods, and if they arent enough you use more complex things to suit your needs. We'll begin with one of the simple machine learning models, linear regression, to try and predict global temperatures using human carbon dioxide emissions. A linear regression just tries to find a line that best fits the data points by minimizing the vertical distance between the data points and the regression line. Read more about linear regressions and their purpose in machine learning here: https://machinelearningmastery.com/linear-regression-for-machine-learning/ 
+
+```python3
+from sklearn.linear_model import LinearRegression
+
+#reshaping our data so that it follows the #samples by #features format
+co2 = co2.reshape(-1, 1)
+global_temps = np.array(temp_df['No_Smoothing']).reshape(-1, 1)
+
+reg = LinearRegression().fit(co2, global_temps)
+print(f"score is: {reg.score(co2 ,global_temps)}")
+print(f"coefficient is: {reg.coef_[0]}")
+print(f"intercept is: {reg.intercept_}")
+```
+![image](https://user-images.githubusercontent.com/49928811/146820254-8146776e-11ce-4295-8d16-9dd67e992862.png)
+```python3
+#prediction for the next 100 years if we cap yearly emissions to 500ppm
+co2_hypothetical = np.array([500]*100).reshape(-1, 1)
+future = range(2020,2120)
+
+plt.plot(future, reg.predict(co2_hypothetical))
+plt.title("Global Temperature With Capped Emissions")
+plt.xlabel("year")
+plt.show()
+
+# if we decrease rate of emmissions by decade steps 
+co2_hypothetical = np.array([500]*10 + [480]*10 + [460]*10 +[440]*10 + [420]*10 + [400]*10  + [380]*10 + [360]*10 + [340]*10 + [320]*10).reshape(-1,1)
+plt.plot(future, reg.predict(co2_hypothetical))
+plt.title("Global Temperature With Decreasing Emissions")
+plt.xlabel("year")
+plt.show()
+```
+![image](https://user-images.githubusercontent.com/49928811/146821927-2c28b3f6-2cb7-4eea-ae06-38eaa0bb6466.png)
+![image](https://user-images.githubusercontent.com/49928811/146821947-6f21ca2f-2ab5-43b2-859f-d6d69b2e5d7e.png)
+
+Do you think this is what the global temperature trends should look like? I dont. Think about it- if we cap the amount of emmissions per year, the amount of co2 in the atmosphere would still be increasing, and therefore the temperature would also still be increasing. There are some serious flaws with using a linear regression in this context. We know there is a strong correlation between human co2 emissions and global temperatures, but that does not mean co2 emisions cause the global temperature to rise. A linear model assumes a linear relationship beween the variables, which is not true in this case. In reality, predicting the gloabl temperatures has a lot of factors, more than just emissions. For example, the average temperature even affects itself; warmer temperature -> less snow and ice coverage of our planet -> lower planetary albedo (albedo is the amount of radiation reflected instead of absorbed) -> warmer temperatures. We'd need a combination of different models. 
+    At this point, I'd just trust the collective researchers that make accurate models of climate for a living. It's still really useful to see the process (and maybe even replicate it) for yourself. Its important to keep in mind that while data visualization can be extremely revealing, it can also mislead. This quick walthrough is just sratching the surface of what you could do with data; if you want more control over your percpective (and the perspective of whoever you like to argue with), I highly reccomend taking this course: https://cmsc320.github.io/ Happy holidays!
 
